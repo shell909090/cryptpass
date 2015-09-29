@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	ikey     = "WueIirKvsQpSc6x3ZSHd5g=="
-	iiv      = "1PNr7RSgUy2ITtD/iEJGOg=="
-	passPath = "/etc/cryptpass.key"
+	ikey = "WueIirKvsQpSc6x3ZSHd5g=="
+	iiv  = "1PNr7RSgUy2ITtD/iEJGOg=="
 )
+
+var PassPath = "/etc/cryptpass.key"
 
 var ErrLengthNotMatch = errors.New("length not match")
 
@@ -52,7 +53,7 @@ func getBytes(reader *bufio.Reader, internal string) ([]byte, error) {
 }
 
 func readKeyIV() ([]byte, []byte, error) {
-	file, err := os.Open(passPath)
+	file, err := os.Open(PassPath)
 	if err != nil {
 		return nil, nil, err
 	}

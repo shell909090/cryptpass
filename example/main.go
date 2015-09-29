@@ -6,14 +6,13 @@ import (
 	"github.com/shell909090/cryptpass"
 )
 
+var pass1 = "QAcP07j3AA=="
+var pass2 = "xd3BFUoV"
+
 func main() {
-	s, _ := cryptpass.EncryptPass("abc")
-	fmt.Println(s)
-	t, _ := cryptpass.DecryptPass(s)
+	t, _ := cryptpass.DecryptPass(pass1)
 	fmt.Println(t)
 
-	s, _ = cryptpass.EncryptPass("中文")
-	fmt.Println(s)
-	t, _ = cryptpass.DecryptPass(s)
+	t, _ = cryptpass.DecryptPass(pass2)
 	fmt.Println(t)
 }

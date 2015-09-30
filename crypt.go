@@ -14,9 +14,20 @@ const (
 	iiv  = "1PNr7RSgUy2ITtD/iEJGOg=="
 )
 
-var PassPath = "/etc/cryptpass.key"
+var (
+	PassPath          = "/etc/cryptpass.key"
+	ErrLengthNotMatch = errors.New("length not match")
+)
 
-var ErrLengthNotMatch = errors.New("length not match")
+var (
+	masterKey    []byte
+	masterIV     []byte
+	cachedPasswd map[string]string
+)
+
+func init() {
+	cachedPasswd = make(map[string]string)
+}
 
 func xorBytes(b1 []byte, b2 []byte) ([]byte, error) {
 	if len(b1) != len(b2) {
@@ -52,39 +63,41 @@ func getBytes(reader *bufio.Reader, internal string) ([]byte, error) {
 	return tbyte, nil
 }
 
-func readKeyIV() ([]byte, []byte, error) {
+func readKeyIV() error {
 	file, err := os.Open(PassPath)
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
 	defer file.Close()
 	reader := bufio.NewReader(file)
 
-	key, err := getBytes(reader, ikey)
+	masterKey, err = getBytes(reader, ikey)
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
 
-	iv, err := getBytes(reader, iiv)
+	masterIV, err = getBytes(reader, iiv)
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
 
-	return key, iv, nil
+	return nil
 }
 
 func EncryptPass(s string) (string, error) {
-	key, iv, err := readKeyIV()
+	if masterKey == nil || masterIV == nil {
+		err := readKeyIV()
+		if err != nil {
+			return "", err
+		}
+	}
+
+	c, err := aes.NewCipher(masterKey)
 	if err != nil {
 		return "", err
 	}
 
-	c, err := aes.NewCipher(key)
-	if err != nil {
-		return "", err
-	}
-
-	stream := cipher.NewCFBEncrypter(c, iv)
+	stream := cipher.NewCFBEncrypter(c, masterIV)
 
 	buf := make([]byte, len(s))
 	stream.XORKeyStream(buf, []byte(s))
@@ -93,17 +106,19 @@ func EncryptPass(s string) (string, error) {
 }
 
 func DecryptPass(s string) (string, error) {
-	key, iv, err := readKeyIV()
+	if masterKey == nil || masterIV == nil {
+		err := readKeyIV()
+		if err != nil {
+			return "", err
+		}
+	}
+
+	c, err := aes.NewCipher(masterKey)
 	if err != nil {
 		return "", err
 	}
 
-	c, err := aes.NewCipher(key)
-	if err != nil {
-		return "", err
-	}
-
-	stream := cipher.NewCFBDecrypter(c, iv)
+	stream := cipher.NewCFBDecrypter(c, masterIV)
 
 	buf := make([]byte, len(s))
 	src, err := base64.StdEncoding.DecodeString(s)
@@ -113,4 +128,23 @@ func DecryptPass(s string) (string, error) {
 	stream.XORKeyStream(buf, src)
 
 	return string(buf), nil
+}
+
+// AutoPass will try to decrypt s to real password.
+// it use cache to speed up decrypt.
+// CAUTION: if it can't, it will return original string.
+// and original string will not set to cache.
+func AutoPass(s string) string {
+	r, ok := cachedPasswd[s]
+	if ok {
+		return r
+	}
+
+	r, err := DecryptPass(s)
+	if err != nil {
+		return s
+	}
+
+	cachedPasswd[s] = r
+	return r
 }

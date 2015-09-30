@@ -8,11 +8,11 @@ import (
 
 var pass1 = "QAcP07j3AA=="
 var pass2 = "xd3BFUoV"
+var pass3 = "abcdef"
 
 func main() {
-	t, _ := cryptpass.DecryptPass(pass1)
-	fmt.Println(t)
-
-	t, _ = cryptpass.DecryptPass(pass2)
-	fmt.Println(t)
+	cryptpass.PassPath = "cryptpass.key"
+	fmt.Println(cryptpass.AutoPass(pass1))
+	fmt.Println(cryptpass.AutoPass(pass2))
+	fmt.Println(cryptpass.AutoPass(pass3))
 }

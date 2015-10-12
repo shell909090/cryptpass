@@ -113,20 +113,19 @@ func DecryptPass(s string) (string, error) {
 		}
 	}
 
-	c, err := aes.NewCipher(masterKey)
-	if err != nil {
-		return "", err
-	}
-
-	stream := cipher.NewCFBDecrypter(c, masterIV)
-
-	buf := make([]byte, len(s))
 	src, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
 		return "", err
 	}
-	stream.XORKeyStream(buf, src)
 
+	c, err := aes.NewCipher(masterKey)
+	if err != nil {
+		return "", err
+	}
+	stream := cipher.NewCFBDecrypter(c, masterIV)
+
+	buf := make([]byte, len(s))
+	stream.XORKeyStream(buf, src)
 	return string(buf), nil
 }
 

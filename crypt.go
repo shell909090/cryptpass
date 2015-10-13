@@ -147,3 +147,23 @@ func AutoPass(s string) string {
 	cachedPasswd[s] = r
 	return r
 }
+
+func SafePass(s string) string {
+	if s[:3] != ".5\"" {
+		return s
+	}
+	k := s[3:]
+
+	r, ok := cachedPasswd[k]
+	if ok {
+		return r
+	}
+
+	r, err := DecryptPass(k)
+	if err != nil {
+		return s
+	}
+
+	cachedPasswd[k] = r
+	return r
+}

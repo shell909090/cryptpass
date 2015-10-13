@@ -16,7 +16,7 @@ func main() {
 	fmt.Println(cryptpass.AutoPass(pass2))
 	fmt.Println(cryptpass.AutoPass(pass3))
 
-	fmt.Println(cryptpass.SafePass(".5\"" + pass1))
-	fmt.Println(cryptpass.SafePass(".5\"" + pass2))
-	fmt.Println(cryptpass.SafePass(".5\"" + pass3))
+	fmt.Println(cryptpass.SafePass(".[~" + pass1))
+	fmt.Println(cryptpass.SafePass(".[~" + pass2))
+	fmt.Println(cryptpass.SafePass(".[~" + pass3))
 }

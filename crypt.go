@@ -149,7 +149,7 @@ func AutoPass(s string) string {
 }
 
 func SafePass(s string) string {
-	if s[:3] != ".5\"" {
+	if s[:3] != ".[~" {
 		return s
 	}
 	k := s[3:]

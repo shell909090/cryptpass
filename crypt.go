@@ -124,7 +124,7 @@ func DecryptPass(s string) (string, error) {
 	}
 	stream := cipher.NewCFBDecrypter(c, masterIV)
 
-	buf := make([]byte, len(s))
+	buf := make([]byte, len(src))
 	stream.XORKeyStream(buf, src)
 	return string(buf), nil
 }

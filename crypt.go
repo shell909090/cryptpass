@@ -149,6 +149,10 @@ func AutoPass(s string) string {
 }
 
 func SafePass(s string) string {
+	if len(s) < 4 {
+		return s
+	}
+	
 	if s[:3] != ".[~" {
 		return s
 	}
